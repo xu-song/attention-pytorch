@@ -19,51 +19,50 @@ import torch.nn as nn
 from torch import optim
 import torch.nn.functional as F
 
-from utils.util import *
 
 # 为了更通用，建议采用import attnencoder as encoder
-from encoder import *
-from decoder import *
+from encoder import EncoderRNN
+from decoder import AttnDecoderRNN
 from seq2seq.seq2seq_eval import evaluateSet
+from utils.util import *
 
-######################################################################
-# Parameter
-# ------------------
-dataset = 'translation'   # 'lang' 'xiaohuangji' 'aspect'
-use_pretrain = False 
-pretrained_weight = None
 
+
+import config
+args = config.get_args()
+print(args.task)
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(device)
 
+config.makedirs(args.save_path)
 
-if(dataset=="translation"):
+if(args.task=="translation"):
     from dataset.translation import *
-    input_lang, output_lang, pairs = prepareData('eng', 'fra', True, index=True)
-    
-    if(dataset=='xiaohuangji'):
-        test_size = 1000
-    else:
+    if(args.dataset=='eng-fra'):
+        input_lang, output_lang, pairs = prepareData('eng', 'fra', True, index=True)
         test_size = int(len(pairs)/6)
-
+        
     random.shuffle(pairs)
     test_set = pairs[0:test_size]
-    #train_set = pairs[test_size:len(pairs)]
-    train_set = pairs
+    train_set = pairs[test_size:len(pairs)]
     print("Train pairs %s; Test pairs %s" % (len(pairs)-test_size, test_size))
     print(random.choice(pairs))
     
-else:
+elif(args.task=="qa"):
+    from dataset.xiaohuangji import *
+    input_lang, output_lang, pairs = prepareData()
+    test_size = 1000
+ 
+    random.shuffle(pairs)
+    test_set = pairs[0:test_size]
+    train_set = pairs[test_size:len(pairs)]
+    print("Train pairs %s; Test pairs %s" % (len(pairs)-test_size, test_size))
+    print(random.choice(pairs))
+
+elif(args.task=="snli"):
     from dataset.snli import *
     input_lang, output_lang, train_set, test_set = prepareData(label='entailment')
-
-
-
-
-
-
-
 
 
 
@@ -126,10 +125,7 @@ def train(input_tensor, target_tensor, encoder, decoder, encoder_optimizer, deco
     encoder_optimizer.step()
     decoder_optimizer.step()
 
-    if type(decoder) is DecoderAspect:
-        return loss.item() / target_length, is_correct
-    else:
-        return loss.item() / target_length
+    return loss.item() / target_length
 
 
 def trainIters(encoder, decoder, n_iters, print_every=1000, plot_every=100, learning_rate=0.01, save_every=1000):
@@ -142,7 +138,7 @@ def trainIters(encoder, decoder, n_iters, print_every=1000, plot_every=100, lear
     encoder_optimizer = optim.SGD(encoder.parameters(), lr=learning_rate)
     decoder_optimizer = optim.SGD(decoder.parameters(), lr=learning_rate)
     training_pairs = [tensorsFromPair(input_lang, output_lang, random.choice(train_set))
-                      for i in range(n_iters)]
+                      for i in range(n_iters)]  # 当n_iters很大时，这里会特别占内存，而且特别慢，需要优化。
     #criterion = nn.NLLLoss()
     criterion = nn.CrossEntropyLoss()
 
@@ -171,8 +167,8 @@ def trainIters(encoder, decoder, n_iters, print_every=1000, plot_every=100, lear
             plot_losses_test.append(test_loss_avg)
 
         if iter % save_every ==0:
-            torch.save(encoder.state_dict(), 'model/encoder')
-            torch.save(decoder.state_dict(), 'model/decoder')
+            torch.save(encoder.state_dict(), args.save_path + '/encoder')
+            torch.save(decoder.state_dict(), args.save_path + '/decoder')
 
 
 
@@ -190,15 +186,15 @@ encoder1 = EncoderRNN(input_lang.n_words, hidden_size).to(device)
 attn_decoder1 = AttnDecoderRNN(hidden_size, output_lang.n_words, MAX_LENGTH, dropout_p=0.1).to(device)
 
 
-torch.save(input_lang, 'model/input_lang')
-torch.save(output_lang, 'model/output_lang')
-torch.save(test_set, 'model/test_set')
+torch.save(input_lang, args.save_path + '/input_lang')
+torch.save(output_lang, args.save_path + '/output_lang')
+torch.save(test_set, args.save_path + '/test_set')
 
-trainIters(encoder1, attn_decoder1, 7500000,  print_every=5000, plot_every=5000, save_every=5000)
-#trainIters(encoder1, attn_decoder1, 70,  print_every=10, plot_every=10, save_every=10)
+print(args.print_every)
+trainIters(encoder1, attn_decoder1, args.n_iters,  args.print_every, args.plot_every, save_every=args.save_every)
 
-torch.save(encoder1.state_dict(), 'model/encoder')
-torch.save(attn_decoder1.state_dict(), 'model/decoder')
+torch.save(encoder1.state_dict(), args.save_path + '/encoder')
+torch.save(attn_decoder1.state_dict(), args.save_path + '/decoder')
 
 
 

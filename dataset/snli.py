@@ -21,7 +21,6 @@ def filterPair(p):
     return len(p[0].split(' ')) < MAX_LENGTH and \
         len(p[1].split(' ')) < MAX_LENGTH
 
-
     
 def filterPairs(pairs, label=None):
     if label is None:
@@ -42,9 +41,9 @@ def read(reverse=False, share_lang=True):
     
     if share_lang:
         lang = Lang('premise+hypothesis')
-        return lang, lang, Label('label'), train_set, test_set # 兼容不同词典.
-    else: 
-        return Lang('premise'), Lang('hypothesis'), Label('label'), train_set, test_set
+        return lang, lang, Label('label'), train_set, test_set
+    else:  # 兼容不同词典
+        return Lang('premise'), Lang('hypothesis'), Label('label'), train_set, test_set  
 
 
 def prepareData(index=True, filter_label=None):
@@ -53,7 +52,6 @@ def prepareData(index=True, filter_label=None):
     
     train_set = filterPairs(train_set, filter_label)
     test_set = filterPairs(test_set, filter_label)
-        
     print("Trimmed to train %s, test %s" % (len(train_set), len(test_set)))
 
     allset = train_set + test_set

@@ -24,5 +24,7 @@ data/
 .data/
 
 # model
+result/
 model/
 model*
+.ipynb_checkpoints

@@ -17,6 +17,13 @@ MAX_LENGTH = 10  # filter by MAX_LENGTH
 SOS_token = 0
 EOS_token = 1
 
+# 英法翻译
+urls = 'https://download.pytorch.org/tutorial/data.zip'
+
+# 中英翻译
+
+
+# 
 
 '''
 language
@@ -100,7 +107,7 @@ def normalizeZh(s):
 # To read the data file we will split the file into lines, and then split
 # lines into pairs. The files are all English → Other Language, so if we
 # want to translate from Other Language → English I added the ``reverse``
-# flag to reverse the pairs.
+# flag to reverse the pairs. reverse用于英法-法英翻译的互换。
 #
 
 def readLangs(lang1, lang2, reverse=False):

@@ -27,7 +27,6 @@ $ python seq2seq_train.py -- task translation --model=transformer
 $ python seq2seq_train.py -- task translation --model=transformer --dataset=en-zh
 ```
 
-
 ## 聊天对话 QA
 
 数据格式：
@@ -38,7 +37,8 @@ question answer
 QA和翻译，区别仅仅是qa的输入输出共用词典，模型通用
 
 ```
-$ python seq2seq_train.py --task qa
+$ python seq2seq/seq2seq_train.py --task qa
+
 ```
 
 ## 基于方面的情感分析 
@@ -69,6 +69,12 @@ sentent1, sentence2, label
 
 
 
+## config
+
+修改 config.py
+
+
+
 ## 句子不等长的策略
 
 1. 对input句子进行zero-padding
@@ -88,3 +94,4 @@ zero表示什么？表示SOS吗？还是单独的一个东西？对应embedding�
 - https://github.com/tensorflow/tensor2tensor
 T2T 有助于针对各种机器学习应用（如翻译、解析、图像字幕制作等）创建最先进的模型，从而以远胜于过去的速度探索各种想法。
 - dataset https://github.com/pytorch/text/blob/master/torchtext/datasets/
+- https://github.com/pytorch/tutorials/blob/master/intermediate_source/seq2seq_translation_tutorial.py
