@@ -95,3 +95,4 @@ zero表示什么？表示SOS吗？还是单独的一个东西？对应embedding�
 T2T 有助于针对各种机器学习应用（如翻译、解析、图像字幕制作等）创建最先进的模型，从而以远胜于过去的速度探索各种想法。
 - dataset https://github.com/pytorch/text/blob/master/torchtext/datasets/
 - https://github.com/pytorch/tutorials/blob/master/intermediate_source/seq2seq_translation_tutorial.py
+- https://github.com/google/seq2seq/tree/master/seq2seq/ 通用的seq2seq框架，可借鉴
